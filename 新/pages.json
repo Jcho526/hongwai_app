@@ -1,0 +1,70 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "uni-app"
+      }
+    },
+	{  
+	  "path": "pages/photoRecords/photoRecords",
+	  "style": { "navigationStyle": "custom" }
+	},
+
+    {
+      "path": "pages/main/main",
+      "style": {
+        "navigationBarTitleText": ""
+      }
+    },
+    {
+      "path": "pages/person/person",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/person/addPerson",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/checkItems/checkItems",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+	{
+	  "path": "pages/capture/capture",
+	  "style": {
+	    "navigationStyle": "custom"
+	  }
+	},
+    {
+      "path": "pages/feedback/feedback",
+      "style": {
+        "navigationBarTitleText": "意见反馈",
+        "navigationBarBackgroundColor": "#00c4b8",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": false
+      }
+    },
+	{
+	  "path": "pages/capturePreview/capturePreview",
+	  "style": { "navigationStyle": "custom" }
+	},
+	{
+	  "path": "pages/captureList/captureList",
+	  "style": { "navigationStyle": "custom" }
+	}
+
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "uniIdRouter": {}
+}
