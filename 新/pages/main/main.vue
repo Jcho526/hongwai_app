@@ -55,6 +55,8 @@
 </template>
 
 <script>
+import { logout as logoutRequest } from "../../services/auth";
+
 export default {
   methods: {
     // 顶部摄像头图标
@@ -92,7 +94,7 @@ export default {
     },
 
     goToSystem() {
-      uni.showToast({ title: "系统设置（待接入）", icon: "none" });
+      uni.navigateTo({ url: "/pages/systemSettings/systemSettings" });
     },
 
     goToCompare() {
@@ -107,8 +109,11 @@ export default {
       uni.showModal({
         title: "提示",
         content: "确定要退出登录吗？",
-        success: function (res) {
+        success: async (res) => {
           if (res.confirm) {
+            try {
+              await logoutRequest();
+            } catch (e) {}
             uni.reLaunch({
               url: "/pages/index/index"
             });

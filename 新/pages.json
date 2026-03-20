@@ -57,6 +57,10 @@
 	{
 	  "path": "pages/captureList/captureList",
 	  "style": { "navigationStyle": "custom" }
+	},
+	{
+	  "path": "pages/systemSettings/systemSettings",
+	  "style": { "navigationStyle": "custom" }
 	}
 
   ],

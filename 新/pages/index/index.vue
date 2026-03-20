@@ -69,6 +69,8 @@
 </template>
 
 <script>
+import { loginByPassword } from "../../services/auth";
+
 export default {
   data() {
     return {
@@ -88,18 +90,23 @@ export default {
     }
   },
   methods: {
-    //  修改：点击登录直接跳转到主页面
-    login() {
-      if (this.canLogin) {
-        uni.showToast({
-          title: '登录成功',
-          icon: 'success'
-        });
-    
-        // ✅ 登录成功后跳转到主页面
-        uni.reLaunch({
-          url: '/pages/main/main'
-        });
+    async login() {
+      const username = String(this.username || "").trim();
+      const password = String(this.password || "").trim();
+
+      if (!username) {
+        return uni.showToast({ title: "请输入用户名", icon: "none" });
+      }
+      if (!password) {
+        return uni.showToast({ title: "请输入密码", icon: "none" });
+      }
+
+      try {
+        await loginByPassword({ username, password });
+        uni.showToast({ title: "登录成功", icon: "success" });
+        uni.reLaunch({ url: "/pages/main/main" });
+      } catch (e) {
+        uni.showToast({ title: e.message || "登录失败", icon: "none" });
       }
     },
     goForgotPassword() {
@@ -108,8 +115,8 @@ export default {
       });
     },
     generateCalc() {
-      const a = Math.floor(Math.random() * 10) + 1;
-      const b = Math.floor(Math.random() * 10) + 1;
+      let a = Math.floor(Math.random() * 10) + 1;
+      let b = Math.floor(Math.random() * 10) + 1;
       let result = 0;
       let op = '';
       if (Math.random() > 0.5) {

@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import { addOnePerson, gen10Id } from "../utils/personStore.js";
+import { createPerson } from "../../services/persons";
 
 export default {
   data() {
@@ -123,24 +123,27 @@ export default {
       this.formData.gender = gender;
     },
 
-    savePerson() {
+    async savePerson() {
       if (!this.formData.name) {
         return uni.showToast({ title: "请输入姓名", icon: "none" });
       }
 
-      const person = {
-        id: gen10Id(),
-        ...this.formData,
-        age: Number(this.formData.age),
-        createdAt: Date.now()
-      };
+      try {
+        await createPerson({
+          ...this.formData,
+          age: Number(this.formData.age || 0)
+        });
 
-      addOnePerson(person);
-      uni.showToast({ title: "保存成功", icon: "success" });
-
-      setTimeout(() => {
-        uni.navigateBack();
-      }, 300);
+        uni.showToast({ title: "保存成功", icon: "success" });
+        setTimeout(() => {
+          uni.navigateBack();
+        }, 300);
+      } catch (e) {
+        uni.showToast({
+          title: (e && e.message) ? String(e.message).slice(0, 20) : "保存失败",
+          icon: "none"
+        });
+      }
     },
 
     resetForm() {

@@ -66,6 +66,10 @@
       </view>
     </view>
 
+    <view class="demo-warning">
+      <text class="demo-warning-text">演示模式：当前页面仅用于功能演示，报告与结果均非医疗诊断依据。</text>
+    </view>
+
     <!-- 内容区 -->
     <scroll-view class="content" scroll-y>
       <view v-if="pagedList.length === 0" class="empty">
@@ -205,14 +209,12 @@
 </template>
 
 <script>
-import { getAllPersons } from "../utils/personStore.js";
+import { listPersons, updatePerson, deletePerson } from "../../services/persons";
 
 export default {
   name: "person",
   data() {
     return {
-      STORAGE_KEY: "persons",
-      DELETED_KEY: "persons_deleted_ids",
       activeTab: "name",
       keyword: "",
       total: 0,
@@ -241,24 +243,25 @@ export default {
         phone3: "",
         relativePhone: "",
         idCard: ""
-      }
+      },
+
+      demoReportUrl: "http://127.0.0.1:3000/static/reports/demo/source/%E9%9D%A2%E8%AF%8A.pdf"
     };
   },
   computed: {
     pagedList() {
-      const start = (this.page - 1) * this.pageSize;
-      return this.filteredList.slice(start, start + this.pageSize);
+      return this.filteredList;
     }
   },
   watch: {
     activeTab() {
       this.page = 1;
       this.refreshSuggest();
-      this.applyFilter();
+      this.fetchPersons();
     }
   },
   onShow() {
-    this.reloadList();
+    this.fetchPersons();
   },
   beforeDestroy() {
     if (this.debounceTimer) clearTimeout(this.debounceTimer);
@@ -285,7 +288,7 @@ export default {
       if (this.debounceTimer) clearTimeout(this.debounceTimer);
       this.debounceTimer = setTimeout(() => {
         this.page = 1;
-        this.applyFilter();
+        this.fetchPersons();
       }, this.debounceMs);
     },
 
@@ -304,7 +307,7 @@ export default {
     onSearchNow() {
       if (this.debounceTimer) clearTimeout(this.debounceTimer);
       this.page = 1;
-      this.applyFilter();
+      this.fetchPersons();
       this.refreshSuggest();
       this.showSuggest = false;
     },
@@ -365,102 +368,44 @@ export default {
       this.suggestions = out;
     },
 
-    reloadList() {
-      // 1) 读本地 persons（你删除时写入的）
-      let cacheList = [];
+    async fetchPersons() {
       try {
-        const cache = uni.getStorageSync(this.STORAGE_KEY);
-        if (Array.isArray(cache)) cacheList = cache;
-      } catch (e) {}
-    
-      // 2) 读 personStore（你新增很可能写到这里）
-      const storeListRaw = getAllPersons();
-      const storeList = Array.isArray(storeListRaw) ? storeListRaw : [];
-    
-      // 3) 读删除黑名单（防止删除后复活）
-      let deletedIds = [];
-      try {
-        const del = uni.getStorageSync(this.DELETED_KEY);
-        if (Array.isArray(del)) deletedIds = del;
-      } catch (e) {}
-      const delSet = new Set(deletedIds.map(String));
-    
-      // 4) 合并两份数据：以 id 为主键，优先用 cache（因为你编辑/删除会先落到 cache）
-      const map = new Map();
-      for (const p of storeList) {
-        if (!p || p.id == null) continue;
-        map.set(String(p.id), p);
-      }
-      for (const p of cacheList) {
-        if (!p || p.id == null) continue;
-        map.set(String(p.id), p); // cache 覆盖 store
-      }
-    
-      // 5) 过滤掉已删除的 id
-      let merged = Array.from(map.values()).filter(p => !delSet.has(String(p.id)));
-    
-      // 6) 你如果希望保持原有顺序，可以按 id 排一下（可删）
-      merged.sort((a, b) => String(b.id).localeCompare(String(a.id)));
-    
-      // 7) 写回 persons，让后续统一
-      try {
-        uni.setStorageSync(this.STORAGE_KEY, merged);
-      } catch (e) {}
-    
-      this.allList = merged;
-      this.applyFilter();
-      this.refreshSuggest();
-    },
+        const res = await listPersons({
+          page: this.page,
+          pageSize: this.pageSize,
+          keyword: this.keyword,
+          searchType: this.activeTab
+        });
 
-    applyFilter() {
-      const kw = (this.keyword || "").trim();
-      let list = Array.isArray(this.allList) ? [...this.allList] : [];
-
-      if (kw) {
-        if (this.activeTab === "name") {
-          list = list.filter((p) => String(p.name || "").includes(kw));
-        } else {
-          list = list.filter((p) => {
-            const phones = [p.phone1, p.phone2, p.phone3, p.relativePhone];
-            return phones.some((x) => String(x || "").includes(kw));
-          });
-        }
+        this.filteredList = Array.isArray(res.list) ? res.list : [];
+        this.allList = [...this.filteredList];
+        this.total = Number(res.total || 0);
+        this.page = Number(res.page || this.page || 1);
+        this.pageSize = Number(res.pageSize || this.pageSize || 20);
+        this.pageTotal = Math.max(1, Math.ceil(this.total / this.pageSize));
+        this.refreshSuggest();
+      } catch (e) {
+        uni.showToast({ title: "加载失败", icon: "none" });
       }
-
-      this.filteredList = list;
-      this.total = list.length;
-      this.pageTotal = Math.max(1, Math.ceil(this.total / this.pageSize));
-      if (this.page > this.pageTotal) this.page = this.pageTotal;
     },
 
     onDelete(item) {
       uni.showModal({
         title: "删除人员",
         content: `确认删除【${item.name || ""}】吗？`,
-        success: (res) => {
+        success: async (res) => {
           if (!res.confirm) return;
 
-          const id = item.id;
-          const newAll = (Array.isArray(this.allList) ? this.allList : []).filter((p) => p.id !== id);
-
           try {
-            uni.setStorageSync(this.STORAGE_KEY, newAll);
-          } catch (e) {}
-
-          this.allList = newAll;
-          this.page = 1;
-          this.applyFilter();
-          this.refreshSuggest();
-
-          uni.showToast({ title: "已删除", icon: "none" });
-		  // ✅ 记录删除黑名单（防止退出回来复活）
-		  try {
-		    const del = uni.getStorageSync(this.DELETED_KEY);
-		    const arr = Array.isArray(del) ? del : [];
-		    const sid = String(id);
-		    if (!arr.includes(sid)) arr.push(sid);
-		    uni.setStorageSync(this.DELETED_KEY, arr);
-		  } catch (e) {}
+            await deletePerson(item.id);
+            uni.showToast({ title: "已删除", icon: "none" });
+            if (this.filteredList.length === 1 && this.page > 1) {
+              this.page -= 1;
+            }
+            await this.fetchPersons();
+          } catch (e) {
+            uni.showToast({ title: "删除失败", icon: "none" });
+          }
 
         }
       });
@@ -486,47 +431,31 @@ export default {
       this.showEdit = false;
     },
 
-    saveEdit() {
+    async saveEdit() {
       const name = (this.editForm.name || "").trim();
       if (!name) {
         uni.showToast({ title: "请输入姓名", icon: "none" });
         return;
       }
 
-      const id = this.editForm.id;
-      const idx = (Array.isArray(this.allList) ? this.allList : []).findIndex(p => p.id === id);
-
-      if (idx === -1) {
-        uni.showToast({ title: "未找到该人员", icon: "none" });
-        this.showEdit = false;
-        return;
-      }
-
-      const old = this.allList[idx];
-      const updated = {
-        ...old,
-        name: this.editForm.name,
-        gender: this.editForm.gender,
-        age: this.editForm.age,
-        phone1: this.editForm.phone1,
-        phone2: this.editForm.phone2,
-        phone3: this.editForm.phone3,
-        relativePhone: this.editForm.relativePhone,
-        idCard: this.editForm.idCard
-      };
-
-      this.allList.splice(idx, 1, updated);
-
       try {
-        uni.setStorageSync(this.STORAGE_KEY, this.allList);
-      } catch (e) {}
+        await updatePerson(this.editForm.id, {
+          name: this.editForm.name,
+          gender: this.editForm.gender,
+          age: Number(this.editForm.age || 0),
+          phone1: this.editForm.phone1,
+          phone2: this.editForm.phone2,
+          phone3: this.editForm.phone3,
+          relativePhone: this.editForm.relativePhone,
+          idCard: this.editForm.idCard
+        });
 
-      // 刷新筛选/联想/分页
-      this.applyFilter();
-      this.refreshSuggest();
-
-      this.showEdit = false;
-      uni.showToast({ title: "已保存", icon: "none" });
+        this.showEdit = false;
+        uni.showToast({ title: "已保存", icon: "none" });
+        await this.fetchPersons();
+      } catch (e) {
+        uni.showToast({ title: "保存失败", icon: "none" });
+      }
     },
 
     // ✅ 关键：拍照按钮进入“检查项目”页面
@@ -542,10 +471,39 @@ export default {
       uni.showToast({ title: `对比：${item.name}`, icon: "none" });
     },
     onReport(item) {
-      uni.showToast({ title: `报告：${item.name}`, icon: "none" });
+      uni.showModal({
+        title: "演示报告",
+        content: "当前为演示模式：未连接红外设备，展示的是示例PDF（非诊断结果）。",
+        confirmText: "打开报告",
+        success: ({ confirm }) => {
+          if (!confirm) return;
+
+          uni.downloadFile({
+            url: this.demoReportUrl,
+            success: (res) => {
+              if (res.statusCode !== 200) {
+                uni.showToast({ title: "报告文件不可用", icon: "none" });
+                return;
+              }
+
+              uni.openDocument({
+                filePath: res.tempFilePath,
+                fileType: "pdf",
+                showMenu: true,
+                fail: () => {
+                  uni.showToast({ title: "打开PDF失败", icon: "none" });
+                }
+              });
+            },
+            fail: () => {
+              uni.showToast({ title: "下载报告失败", icon: "none" });
+            }
+          });
+        }
+      });
     },
     onDiagnose(item) {
-      uni.showToast({ title: `诊断：${item.name}`, icon: "none" });
+      uni.showToast({ title: `演示提示：${item.name}（非诊断）`, icon: "none" });
     },
     onDetail(item) {
       const url =
@@ -561,10 +519,12 @@ export default {
     prevPage() {
       if (this.page <= 1) return;
       this.page--;
+      this.fetchPersons();
     },
     nextPage() {
       if (this.page >= this.pageTotal) return;
       this.page++;
+      this.fetchPersons();
     }
   }
 };
@@ -674,6 +634,18 @@ export default {
 .suggest-sub { display: block; margin-top: 6rpx; font-size: 22rpx; color: #888; }
 
 .content { flex: 1; background: #ffffff; }
+.demo-warning {
+  margin: 8rpx 18rpx 0;
+  padding: 14rpx 16rpx;
+  background: #fff7e6;
+  border: 1rpx solid #ffd591;
+  border-radius: 10rpx;
+}
+.demo-warning-text {
+  font-size: 22rpx;
+  line-height: 34rpx;
+  color: #ad6800;
+}
 .empty { padding: 80rpx 0; display: flex; align-items: center; justify-content: center; }
 .empty-txt { color: #9a9a9a; font-size: 28rpx; }
 
