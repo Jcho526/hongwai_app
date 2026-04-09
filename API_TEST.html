@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>热成像 API 集成测试</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            color: #555;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        .output {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #333;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .output.success {
+            background: #f0fdf4;
+            border-color: #86efac;
+            color: #166534;
+        }
+        .output.error {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #667eea;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .status.info {
+            background: #dbeafe;
+            color: #0c4a6e;
+        }
+        .file-preview {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 6px;
+        }
+        .file-preview a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .file-preview a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 热成像报告生成 API 集成测试</h1>
+
+        <div class="section">
+            <div class="section-title">📋 API 配置</div>
+            <div class="form-group">
+                <label for="apiUrl">API 地址:</label>
+                <input type="text" id="apiUrl" value="http://localhost:5000/api/v1/generate-pdf">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">👤 患者信息</div>
+            <div class="form-group">
+                <label for="patientName">患者名:</label>
+                <input type="text" id="patientName" value="测试患者">
+            </div>
+            <div class="form-group">
+                <label for="patientAge">年龄:</label>
+                <input type="number" id="patientAge" value="35" min="0" max="150">
+            </div>
+            <div class="form-group">
+                <label for="patientGender">性别:</label>
+                <select id="patientGender">
+                    <option value="未知">未知</option>
+                    <option value="男" selected>男</option>
+                    <option value="女">女</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="patientId">患者 ID:</label>
+                <input type="text" id="patientId" value="PT001">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🖼️ 图片选择</div>
+            <div class="form-group">
+                <label for="imageFile">选择热成像图片:</label>
+                <input type="file" id="imageFile" accept="image/*">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">⚙️ 操作</div>
+            <div class="button-group">
+                <button class="btn-primary" onclick="testAPI()">
+                    <span id="testBtn">📤 测试 API</span>
+                </button>
+                <button class="btn-secondary" onclick="clearOutput()">🗑️ 清空输出</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📊 输出结果</div>
+            <div id="status"></div>
+            <div id="output" class="output"></div>
+            <div id="filePreview" class="file-preview" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌ ' : type === 'success' ? '✅ ' : 'ℹ️ ';
+            output.textContent += `[${timestamp}] ${prefix}${message}\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function setStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+
+        function clearOutput() {
+            document.getElementById('output').textContent = '';
+            document.getElementById('status').textContent = '';
+            document.getElementById('filePreview').style.display = 'none';
+        }
+
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function testAPI() {
+            const imageFile = document.getElementById('imageFile').files[0];
+            if (!imageFile) {
+                setStatus('❌ 请选择图片文件', 'error');
+                log('请先选择一个图片文件', 'error');
+                return;
+            }
+
+            clearOutput();
+            setStatus('⏳ 正在处理...', 'info');
+            log(`图片文件: ${imageFile.name} (${(imageFile.size / 1024).toFixed(2)} KB)`);
+
+            try {
+                // 转换图片为 base64
+                log('📖 正在读取图片...');
+                const imageBase64 = await fileToBase64(imageFile);
+                log(`✅ 图片读取成功，大小: ${imageBase64.length} 字符`);
+
+                // 准备请求数据
+                const apiUrl = document.getElementById('apiUrl').value;
+                const patientName = document.getElementById('patientName').value;
+                const patientAge = document.getElementById('patientAge').value;
+                const patientGender = document.getElementById('patientGender').value;
+                const patientId = document.getElementById('patientId').value;
+
+                log('📤 正在发送请求到 API...');
+                log(`API 地址: ${apiUrl}`);
+                log(`患者信息: ${patientName}, ${patientAge}岁, ${patientGender}`);
+
+                const startTime = Date.now();
+
+                // 发送请求
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image_base64: imageBase64,
+                        patient_name: patientName,
+                        patient_age: patientAge,
+                        patient_gender: patientGender,
+                        patient_id: patientId,
+                        template: 'universal'
+                    })
+                });
+
+                const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
+                log(`📥 收到响应 (耗时: ${elapsedTime} 秒)`);
+                log(`状态码: ${response.status}`);
+
+                if (response.status === 200) {
+                    // 获取 DOCX 文件
+                    const blob = await response.blob();
+                    log(`✅ 文档生成成功! 大小: ${(blob.size / 1024).toFixed(2)} KB`);
+
+                    // 创建下载链接
+                    const url = URL.createObjectURL(blob);
+                    const fileName = `热图分析报告_${patientName}_${new Date().getTime()}.docx`;
+                    
+                    // 显示下载链接
+                    const filePreview = document.getElementById('filePreview');
+                    filePreview.innerHTML = `
+                        <strong>📥 生成的报告:</strong><br>
+                        <a href="${url}" download="${fileName}">💾 点击下载: ${fileName}</a>
+                    `;
+                    filePreview.style.display = 'block';
+
+                    setStatus(`✅ 报告生成成功! (${elapsedTime}s)`, 'success');
+                    document.getElementById('output').className = 'output success';
+                } else {
+                    // 尝试解析错误信息
+                    const contentType = response.headers.get('content-type');
+                    let errorMsg = '未知错误';
+
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await response.json();
+                        errorMsg = errorData.error || '生成失败';
+                    } else {
+                        errorMsg = await response.text();
+                    }
+
+                    log(`❌ API 返回错误: ${errorMsg}`, 'error');
+                    setStatus(`❌ 生成失败 (${response.status})`, 'error');
+                    document.getElementById('output').className = 'output error';
+                }
+            } catch (error) {
+                log(`❌ 错误: ${error.message}`, 'error');
+
+                if (error.message.includes('Failed to fetch')) {
+                    log('提示: 无法连接到 API 服务', 'error');
+                    log('请确保已启动 API: python thermal_api.py', 'error');
+                }
+
+                setStatus(`❌ 测试失败: ${error.message}`, 'error');
+                document.getElementById('output').className = 'output error';
+            }
+        }
+
+        // 页面加载时的初始化
+        window.onload = () => {
+            log('🟢 页面已加载，准备测试');
+            log('请选择图片文件并点击"测试 API"按钮');
+        };
+    </script>
+</body>
+</html>

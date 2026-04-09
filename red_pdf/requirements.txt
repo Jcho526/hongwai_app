@@ -1,0 +1,30 @@
+# =========================
+# red_pdf 项目依赖清单
+# =========================
+
+# Web API
+Flask>=2.3,<3.1
+
+# 文档处理（DOCX 读写 / 生成）
+python-docx>=1.1.0,<2
+
+# DOCX -> PDF（在 Windows + Word 环境最稳定）
+docx2pdf==0.1.8
+
+# 图像处理（热图分析）
+opencv-python>=4.10.0.84
+numpy>=2.1,<2.5
+Pillow>=11.0,<13
+
+# PDF 文本读取
+PyPDF2>=3.0.1,<4
+
+# HTTP 客户端（测试脚本 / 客户端调用 API）
+requests>=2.31,<3
+
+# 生产环境可选（Linux 部署 Flask 时可用；Windows 自动跳过）
+gunicorn==21.2.0; platform_system != "Windows"
+
+# 说明：
+# 1) 本项目若使用 LibreOffice 转 PDF，需单独安装 LibreOffice（系统依赖，不是 pip 包）。
+# 2) thermal_api.py 虽导入了 werkzeug，但 Flask 会自动安装兼容版本，无需单独固定。

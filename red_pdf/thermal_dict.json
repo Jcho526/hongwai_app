@@ -1,0 +1,188 @@
+{
+  "knowledge_base": {
+    "basic_theory": {
+      "core_concept": "以血多血少为中心",
+      "key_points": ["不对称的点", "异常的点"],
+      "color_meaning": {
+        "白色": "炎症",
+        "红色": "气血",
+        "紫色": "气血",
+        "黄色": "代谢较缓",
+        "绿色": "寒症",
+        "蓝色": "寒湿"
+      },
+      "temperature_meaning": {
+        "high": "血多，瘀血，静脉回流不畅",
+        "low": "血少，局部缺血，动脉供血不足"
+      },
+      "abnormal_areas": ["手", "脚", "肚子"]
+    },
+    "analysis_method": {
+      "step1": "观察热图整体左右对称性",
+      "step2": "找出异常的点（不该出现高温/低温的地方）",
+      "step3": "针对不对称和异常的点进行分析",
+      "body_region_analysis": {
+        "头部": "主要看脑供血不足，静脉回流情况",
+        "其他部位": "异常部位白色或红色表示瘀堵/炎症；绿色、蓝色表示寒湿/供血不足"
+      }
+    },
+    "risk_tips": {
+      "high_temperature": ["瘀堵", "炎症", "瘀血", "静脉回流不好", "增生", "结节", "钙化", "充血性改变", "水肿", "肿瘤", "癌风险"],
+      "low_temperature": ["寒湿", "供血不足", "缺血", "动脉血过不去", "经络不通", "囊肿", "哮喘", "子宫肌瘤风险"]
+    }
+  },
+  "thermal_dictionary": [
+    {
+      "id": 1,
+      "category": "头部",
+      "type": "脑供血不足",
+      "features": {
+        "symmetry": "额头、头背面明显不对称",
+        "color": "局部低温（绿色/蓝色）",
+        "distribution": "单侧温度降低"
+      },
+      "risk": "脑供血不足",
+      "description": "头部热图显示单侧温度明显低于另一侧，提示脑供血不足"
+    },
+    {
+      "id": 2,
+      "category": "头部",
+      "type": "静脉回流不好",
+      "features": {
+        "symmetry": "对称",
+        "color": "头背面大面积高温（白色/红色）",
+        "distribution": "头背面大面积温度升高"
+      },
+      "risk": "静脉回流不好",
+      "description": "头背面大面积温度升高，提示静脉回流不畅"
+    },
+    {
+      "id": 3,
+      "category": "胸部",
+      "type": "肺部炎症",
+      "features": {
+        "symmetry": "不对称",
+        "color": "单侧肺部区域高温（白色）",
+        "distribution": "单侧肺部温度升高"
+      },
+      "risk": "炎症、瘀堵",
+      "description": "单侧肺部区域温度明显高于另一侧，呈白色炎症表现"
+    },
+    {
+      "id": 4,
+      "category": "胸部",
+      "type": "心肌供血不足",
+      "features": {
+        "symmetry": "对称或不对称",
+        "color": "心前区低温（绿色/蓝色）",
+        "distribution": "心前区温度降低"
+      },
+      "risk": "心肌供血不足",
+      "description": "心前区温度降低，提示心肌供血不足"
+    },
+    {
+      "id": 5,
+      "category": "腹部",
+      "type": "脾胃虚寒",
+      "features": {
+        "symmetry": "对称",
+        "color": "胃脘部低温（绿色/蓝色）",
+        "distribution": "胃脘部温度降低"
+      },
+      "risk": "脾胃虚寒、寒湿",
+      "description": "胃脘部温度降低，提示脾胃虚寒"
+    },
+    {
+      "id": 6,
+      "category": "腹部",
+      "type": "妇科炎症",
+      "features": {
+        "symmetry": "不对称",
+        "color": "下腹部高温（白色/红色）",
+        "distribution": "下腹部局部温度升高"
+      },
+      "risk": "妇科炎症、瘀堵",
+      "description": "下腹部局部温度升高，提示妇科炎症可能"
+    },
+    {
+      "id": 7,
+      "category": "背部",
+      "type": "膀胱经不通",
+      "features": {
+        "symmetry": "对称或不对称",
+        "color": "背部膀胱经走向低温（绿色/蓝色）",
+        "distribution": "膀胱经沿线温度降低"
+      },
+      "risk": "膀胱经不通、寒湿",
+      "description": "背部膀胱经沿线温度降低，提示经络不通"
+    },
+    {
+      "id": 8,
+      "category": "背部",
+      "type": "腰肌劳损",
+      "features": {
+        "symmetry": "不对称",
+        "color": "腰部单侧高温（白色/红色）",
+        "distribution": "腰部单侧温度升高"
+      },
+      "risk": "腰肌劳损、炎症",
+      "description": "腰部单侧温度升高，提示腰肌劳损或炎症"
+    },
+    {
+      "id": 9,
+      "category": "四肢",
+      "type": "关节寒湿",
+      "features": {
+        "symmetry": "不对称",
+        "color": "关节部位低温（蓝色）",
+        "distribution": "关节局部温度降低"
+      },
+      "risk": "寒湿、经络不通",
+      "description": "关节部位温度明显降低，呈蓝色寒湿表现"
+    },
+    {
+      "id": 10,
+      "category": "四肢",
+      "type": "肢体循环不畅",
+      "features": {
+        "symmetry": "对称",
+        "color": "手脚末端低温（绿色/蓝色）",
+        "distribution": "手脚末端温度降低"
+      },
+      "risk": "血液循环不畅、寒湿",
+      "description": "手脚末端温度降低，提示肢体循环不畅"
+    },
+    {
+      "id": 11,
+      "category": "全身",
+      "type": "上热下寒",
+      "features": {
+        "symmetry": "对称",
+        "color": "上半身高温（红色/白色），下半身低温（绿色/蓝色）",
+        "distribution": "上热下寒分布"
+      },
+      "risk": "阴阳失调、气血不通",
+      "description": "上半身温度明显高于下半身，提示上热下寒体质"
+    },
+    {
+      "id": 12,
+      "category": "全身",
+      "type": "整体寒湿",
+      "features": {
+        "symmetry": "对称",
+        "color": "全身大面积低温（绿色/蓝色）",
+        "distribution": "整体温度偏低"
+      },
+      "risk": "整体寒湿、免疫力低下",
+      "description": "全身大面积温度偏低，提示整体寒湿体质"
+    }
+  ],
+  "body_regions": {
+    "head": ["额头", "头背面", "太阳穴", "眼眶"],
+    "neck": ["颈椎", "两侧颈部"],
+    "chest": ["心前区", "肺部", "乳房"],
+    "abdomen": ["胃脘部", "大腹", "小腹", "少腹"],
+    "back": ["胸椎", "腰椎", "骶椎", "膀胱经"],
+    "limbs": ["肩关节", "肘关节", "腕关节", "髋关节", "膝关节", "踝关节", "手掌", "足底"]
+  }
+}
